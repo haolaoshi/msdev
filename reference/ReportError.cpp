@@ -29,3 +29,11 @@ VOID ReportError(LPCTSTR userMessage, DWORD exitCode, BOOL printfErrorMessage)
 	return;
 }
 
+VOID ReportException(LPCTSTR userMessage,DWORD exceptionCode)
+{
+	ReportError(userMessage,0,TRUE);
+	if(exceptionCode != 0)
+		RaiseException(
+		(0x0FFFFFFF & exceptionCode ) | 0xE0000000,0,0,NULL);
+	return;
+}
