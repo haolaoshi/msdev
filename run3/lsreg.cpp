@@ -1,3 +1,23 @@
+/* Chapter 3. lsREG - Registry list command. */
+/* lsREG [options] SubKey 
+	List the key-value pairs.
+	Options:
+		-R	Recursive
+		-l  List extended information; namely, the last write time
+			and the value type					*/
+
+/* This program illustrates:
+		1.	Registry handles and traversal
+		2.	Registry values
+		3.	The similarity and differences between directory
+			and registry traversal 
+
+	Note that there are no wild card file names and you specify the
+	subkey, with all name-value pairs being listed. This is similar to 
+	ls with "SubKey\*" as the file specifier             */
+
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
 #include <Windows.h>
 #include <tchar.h>
 #include <stdio.h>
