@@ -1,3 +1,4 @@
+/* Utility function to extract option flags from the command line.  */
 #include<windows.h>
 #include <tchar.h>
 #include<stdarg.h>
@@ -8,6 +9,15 @@
 #define _memtchr memchr
 #endif
 
+/* argv is the command line.
+	The options, if any, start with a '-' in argv[1], argv[2], ...
+	OptStr is a text string containing all possible options,
+	in one-to-one correspondence with the addresses of Boolean variables
+	in the variable argument list (...).
+	These flags are set if and only if the corresponding option
+	character occurs in argv [1], argv [2], ...
+	The return value is the argv index of the first argument beyond the options. */
+	
 DWORD Options(int argc, LPTSTR argv[], LPCTSTR OptStr, ...)
 {
 	va_list pFlagList;

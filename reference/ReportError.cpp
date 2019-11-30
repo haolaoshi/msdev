@@ -2,6 +2,15 @@
 #include <stdio.h>
 #include <tchar.h>
 
+/* General-purpose function for reporting system errors.
+	Obtain the error number and turn it into the system error message.
+	Display this information and the user-specified message to the standard error device.
+	UserMessage:		Message to be displayed to standard error device.
+	ExitCode:		0 - Return.
+				\x11> 0 - ExitProcess with this code.
+	PrintErrorMessage:	Display the last system error message if this flag is set. */
+	
+	
 VOID ReportError(LPCTSTR userMessage, DWORD exitCode, BOOL printfErrorMessage)
 {
 	DWORD eMsgLen, errNum = GetLastError();

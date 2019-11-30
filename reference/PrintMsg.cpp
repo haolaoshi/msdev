@@ -1,3 +1,9 @@
+/* PrintMsg.c:
+	ConsolePrompt
+	PrintStrings
+	PrintMsg */
+	
+	
 #include <Windows.h>
 #include <stdarg.h>
 #include <tchar.h>
