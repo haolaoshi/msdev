@@ -1,37 +1,37 @@
 /* Chapter 5, sortMM command.
-	Memory Mapped version - Minimal error reporting. */
+Memory Mapped version - Minimal error reporting. */
 
 /*  sortMM [options] [file]
-	Sort one file. The extension to multiple files is straightforward but is omitted here.
+Sort one file. The extension to multiple files is straightforward but is omitted here.
 
-	Options:
-	-r	Sort in reverse order.
-	-I	Use an existing index file to produce the sorted file.
+Options:
+-r	Sort in reverse order.
+-I	Use an existing index file to produce the sorted file.
 
-	This limited implementation sorts on the first field only.
-	The length of the Key field is determined by the length of the first
-	white space terminated field of the first record (line). */
+This limited implementation sorts on the first field only.
+The length of the Key field is determined by the length of the first
+white space terminated field of the first record (line). */
 
 /* This program illustrates:
-	1.	Mapping files to memory.
-	2.	Use of memory-based string processing functions in a mapped file.
-	3.	Use of a memory based function (qsort) with a memory-mapped file.
-	4.	_based pointers. */
+1.	Mapping files to memory.
+2.	Use of memory-based string processing functions in a mapped file.
+3.	Use of a memory based function (qsort) with a memory-mapped file.
+4.	_based pointers. */
 
 /* Technique:
-	1.	Map the input file (the file to be sorted).
-	2.	Using standard character processing, scan the input file,
-		placing each key (which is fixed size) into the "index" file record
-		(the input file with a .idx suffix).
-		The index file is created using file I/O; later it will be mapped.
-	3.	Also place the start position of the record in the index file record.
-		This is a _based pointer to the mapped input file.
-	4.	Map the index file.
-	5.	Use the C library qsort to sort the index file
-		(which has fixed length records consisting of key and _based pointer).
-	6.	Scan the sorted index file, putting input file records in sorted order.
-	7.	Skip steps 2, 3, and 5 if the -I option is specified.
-		Notice that this requires _based pointers. */
+1.	Map the input file (the file to be sorted).
+2.	Using standard character processing, scan the input file,
+placing each key (which is fixed size) into the "index" file record
+(the input file with a .idx suffix).
+The index file is created using file I/O; later it will be mapped.
+3.	Also place the start position of the record in the index file record.
+This is a _based pointer to the mapped input file.
+4.	Map the index file.
+5.	Use the C library qsort to sort the index file
+(which has fixed length records consisting of key and _based pointer).
+6.	Scan the sorted index file, putting input file records in sorted order.
+7.	Skip steps 2, 3, and 5 if the -I option is specified.
+Notice that this requires _based pointers. */
 #include <Windows.h>
 #include <tchar.h>
 #include <stdio.h>
@@ -44,7 +44,7 @@ VOID ReportError(LPCTSTR userMessage, DWORD exitCode, BOOL printfErrorMessage);
 VOID ReportException(LPCTSTR userMessage,DWORD exceptionCode);
 int KeyCompare (const void * pKey1, const void * pKey2)
 
-/* Compare two records of generic characters.
+	/* Compare two records of generic characters.
 	The key position and length are global variables. */
 {
 	return _tcsncmp ((const char *)pKey1, (const char *)pKey2, KEY_SIZE);
