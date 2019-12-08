@@ -2,6 +2,21 @@
 #include <Windows.h>
 #include <tchar.h>
 
+
+BOOL CreateProcessA(
+  LPCSTR                lpApplicationName,
+  LPSTR                 lpCommandLine,
+  LPSECURITY_ATTRIBUTES lpProcessAttributes,
+  LPSECURITY_ATTRIBUTES lpThreadAttributes,
+  BOOL                  bInheritHandles,
+  DWORD                 dwCreationFlags,
+  LPVOID                lpEnvironment,
+  LPCSTR                lpCurrentDirectory,
+  LPSTARTUPINFOA        lpStartupInfo,
+  LPPROCESS_INFORMATION lpProcessInformation
+);
+
+
 VOID ReportError(LPCTSTR userMessage, DWORD exitCode, BOOL printfErrorMessage);
 
 int _tmain(int argc,LPTSTR argv[])
