@@ -1,7 +1,7 @@
 #include <Windows.h>
 #include <stdio.h>
 #include <tchar.h>
-
+#include "refer.h"
 /* General-purpose function for reporting system errors.
 	Obtain the error number and turn it into the system error message.
 	Display this information and the user-specified message to the standard error device.
@@ -24,7 +24,7 @@ VOID ReportError(LPCTSTR userMessage, DWORD exitCode, BOOL printfErrorMessage)
 			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 			(LPTSTR)&lpvSysMsg, 0, NULL);
 		if (eMsgLen > 0) {
-			_ftprintf(stderr, "%s\n", lpvSysMsg);
+			_ftprintf(stderr, _T("%s\n"), lpvSysMsg);
 		}
 		else {
 			_ftprintf(stderr, _T("Last Error Number : %d.\n"), errNum);

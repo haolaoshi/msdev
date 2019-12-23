@@ -7,6 +7,7 @@
 #include <Windows.h>
 #include <stdarg.h>
 #include <tchar.h>
+#include "refer.h"
 VOID ReportError(LPCTSTR userMessage, DWORD exitCode, BOOL printfErrorMessage);
 BOOL PrintStrings(HANDLE hOut, ...)
 {

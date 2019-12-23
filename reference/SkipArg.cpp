@@ -1,5 +1,5 @@
 #include <Windows.h>
-
+#include "refer.h"
 
 LPTSTR SkipArg(LPCTSTR targv)
 {

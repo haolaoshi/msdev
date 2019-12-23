@@ -1,23 +1,27 @@
 #include <Windows.h>
 #include <tchar.h>
+#include "refer.h"
 
-void GetArgs(LPCTSTR command, int* pargc, LPTSTR argstr[])
+void GetArgs(LPCTSTR Command, int* pArgc, LPTSTR argstr[])
 {
 	int i, icm = 0;
 	DWORD ic = 0;
 
-	for (i = 0; i < _tcslen(command); i++)
-	{
-		while (ic < _tcslen(command) && command[ic] != ' ' && command[ic] != '\t') {
-			argstr[ic][icm] = command[ic];
+	for (i = 0; ic < _tcslen(Command); i++) {
+		while (ic < _tcslen(Command) &&
+			Command[ic] != ' ' && Command[ic] != '\t') {
+			argstr[i][icm] = Command[ic];
 			ic++;
 			icm++;
 		}
 		argstr[i][icm] = '\0';
-		while (ic < _tcslen(command)  && (command[ic] == ' ') || command[ic] == '\t')
+		while (ic < _tcslen(Command) &&
+			(Command[ic] == ' ' || Command[ic] == '\t'))
 			ic++;
 		icm = 0;
 	}
-	if (pargc != NULL) *pargc = i;
+
+	if (pArgc != NULL) *pArgc = i;
 	return;
 }
+

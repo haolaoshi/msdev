@@ -15,6 +15,7 @@ LONG GetJobNumber(PROCESS_INFORMATION* processInfo, LPCTSTR command)
 
 	hJobdata = CreateFile(jobMgtFileName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
 		NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
 	if (hJobdata == INVALID_HANDLE_VALUE) return -1;
 
 	reginStart.Offset = 0;
@@ -53,8 +54,19 @@ BOOL DisplayJobs(void)
 	DWORD jobNumber = 0, nXfer, exitCode, fileSizeLow, fileSizeHigh;
 	TCHAR jobMgtFileName[MAX_PATH];
 	OVERLAPPED regionStart;
+	/*
+	 0x002ed994 L"C:\\Users\\liujh\\AppData\\Local\\Temp\\liujh.JobMgt"
 	GetJobMgtFileName(jobMgtFileName);
 	hJobData = CreateFile(jobMgtFileName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	*/
+	if (GetJobMgtFileName(jobMgtFileName) < 0)
+		return FALSE;
+	hJobData = CreateFile(jobMgtFileName, GENERIC_READ | GENERIC_WRITE,
+		FILE_SHARE_READ | FILE_SHARE_WRITE,
+		NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hJobData == INVALID_HANDLE_VALUE)
+		return FALSE;
+
 	regionStart.Offset = 0;
 	regionStart.OffsetHigh = 0;
 	regionStart.hEvent = (HANDLE)0;
@@ -116,10 +128,14 @@ DWORD FindProcessId(DWORD jobNumber)
 }
 
 BOOL GetJobMgtFileName(LPTSTR JobMgtFileName)
+
+/* Create the name of the job management file in the temporary directory. */
 {
 	TCHAR UserName[MAX_PATH], TempPath[MAX_PATH];
 	DWORD UNSize = MAX_PATH, TPSize = MAX_PATH;
-	if (!GetUserName(UserName, &UNSize)) return FALSE;
+
+	if (!GetUserName(UserName, &UNSize))
+		return FALSE;
 	if (GetTempPath(TPSize, TempPath) > TPSize)
 		return FALSE;
 	_stprintf(JobMgtFileName, _T("%s%s%s"), TempPath, UserName, _T(".JobMgt"));
