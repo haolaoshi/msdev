@@ -9,6 +9,7 @@ typedef struct {
 
 typedef GREP_THREAD_ARG* PGR_ARGS;
 static DWORD WINAPI ThGrep(PGR_ARGS pArgs);
+
 #define MAX_COMMAND_LINE 100
 int _tmain(int argc, LPTSTR argv[])
 {
@@ -20,14 +21,14 @@ int _tmain(int argc, LPTSTR argv[])
 	STARTUPINFO startup;
 	PROCESS_INFORMATION processinfo;
 	GetStartupInfo(&startup);
-	tHandle = malloc((argc - 2) * sizeof(HANDLE));
-	gArg = malloc((argc - 2) * sizeof(GREP_THREAD_ARG));
+	tHandle = (HANDLE*)malloc((argc - 2) * sizeof(HANDLE));
+	gArg = (GREP_THREAD_ARG*)malloc((argc - 2) * sizeof(GREP_THREAD_ARG));
 	for (iThd = 0; iThd < argc - 2; iThd++) {
 		_tcscpy(gArg[iThd].targv[1], argv[1]);
 		_tcscpy(gArg[iThd].targv[2], argv[iThd + 2]);
 		GetTempFileName(_T("."), _T("Gre"), 0, gArg[iThd].targv[3]);
 		gArg[iThd].argc = 4;
-		tHandle[iThd] = (HANDLE)_beginthreadex(NULL, 0, ThGrep, &gArg[iThd], 0, NULL);
+		tHandle[iThd] = (HANDLE)_beginthreadex(NULL, 0, (_beginthreadex_proc_type)ThGrep, &gArg[iThd], 0, NULL);
 
 	}
 	startup.dwFlags = STARTF_USESTDHANDLES;
@@ -58,17 +59,62 @@ int _tmain(int argc, LPTSTR argv[])
 	}
 	return 0;
 }
-static FILE*
-openFile(char* file, char* mode)
+
+void tchar2char(const TCHAR* tch, char* ch)
 {
-	FILE* fp;
-
-	/* printf ("Opening File: %s", file); */
-
-	if ((fp = fopen(file, mode)) == NULL)
-		perror(file);
-	return (fp);
+	int len;
+	len = WideCharToMultiByte(CP_ACP, 0, tch, -1, NULL, 0, NULL, NULL);
+	WideCharToMultiByte(CP_ACP, 0, tch, -1, ch, len, NULL, NULL);
 }
+/* Source code for grep follows and is omitted from text. */
+/* The form of the code is:
+	static DWORD WINAPI ThGrep (GR_ARGS pArgs)
+	{
+	}
+*/
+/* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - */
+
+/*	grep, written as a function to be executed on a thread. */
+/*	Copyright 1995, Alan R. Feuer. */
+/*	Modified version: The input and output file names
+	are taken from the argument data structure for the file.
+	This function uses the C library and therefore must
+	be invoked by _beginthreadex. */
+
+	/*	grep pattern file(s)
+		Looks for pattern in files. A file is scanned line-by-line.
+
+		These metacharacters are used:
+			*	matches zero or more characters
+			?	matches exactly one character
+			[...]	specifies a character class
+				matches any character in the class
+			^	matches the beginning of the line
+			$	matches the end of the line
+		In addition, the standard C escape sequences are
+		understood: \a, \b, \f, \t, \v */
+
+		/*	Codes for pattern metacharacters. */
+
+#define ASTRSK		1
+#define QM		2
+#define BEGCLASS	3
+#define ENDCLASS	4
+#define ANCHOR		5
+
+FILE* openFile(char*, char*);
+void prepSearchString(char*, char*);
+
+BOOL patternMatch(char*, char*);
+
+/* Other codes and definitions. */
+
+#define EOS '\0'
+
+/* Options for pattern match. */
+static int patternSeen = FALSE;
+static BOOL ignoreCase = FALSE;
+
 
 static DWORD WINAPI ThGrep(PGR_ARGS pArgs)
 {
@@ -77,7 +123,7 @@ static DWORD WINAPI ThGrep(PGR_ARGS pArgs)
 		third is the output file.
 		argc is not used but is assumed to be 4. */
 
-	char* file;
+	char* file = (char*)malloc(MAX_PATH);
 	int i, patternSeen = FALSE, showName = FALSE, argc, result = 1;
 	char pattern[256];
 	char string[2048];
@@ -94,8 +140,11 @@ static DWORD WINAPI ThGrep(PGR_ARGS pArgs)
 	}
 
 	/* Open the output file. */
-
-	fpout = openFile(file = argv[argc - 1], "wb");
+	char* m = (char*)malloc(4);
+	strcpy(m, "wb");
+	 
+	tchar2char(argv[argc - 1], file);
+	fpout = openFile(file, m);
 	if (fpout == NULL) {
 		printf("Failure to open output file.");
 		return 1;
@@ -110,9 +159,16 @@ static DWORD WINAPI ThGrep(PGR_ARGS pArgs)
 			}
 		}
 		else {
-			if (!patternSeen++)
-				prepSearchString(argv[i], pattern);
-			else if ((fp = openFile(file = argv[i], "rb"))
+			tchar2char(argv[i], file);
+			char* rb = (char*)malloc(4);
+			strcpy(rb, "rb");
+
+			if (!patternSeen++) {
+				char* sar = (char*)malloc(MAX_PATH);
+				tchar2char(argv[i], sar);
+				prepSearchString(sar, pattern);
+			}				
+			else if ((fp = openFile(file, rb))
 				!= NULL) {
 				if (!showName && i < argc - 2) ++showName;
 				while (fgets(string, sizeof(string), fp)
@@ -134,3 +190,128 @@ static DWORD WINAPI ThGrep(PGR_ARGS pArgs)
 	}
 	return result;
 }
+
+static FILE*
+openFile(char* file, char* mode)
+{
+	FILE* fp;
+
+	/* printf ("Opening File: %s", file); */
+
+	if ((fp = fopen(file, mode)) == NULL)
+		perror(file);
+	return (fp);
+}
+
+
+static void
+prepSearchString(char* p, char* buf)
+
+/* Copy prep'ed search string to buf. */
+{
+	register int c;
+	register int i = 0;
+
+	if (*p == '^') {
+		buf[i++] = ANCHOR;
+		++p;
+	}
+
+	for (;;) {
+		switch (c = *p++) {
+		case EOS: goto Exit;
+		case '*': if (i >= 0 && buf[i - 1] != ASTRSK)
+			c = ASTRSK; break;
+		case '?': c = QM; break;
+		case '[': c = BEGCLASS; break;
+		case ']': c = ENDCLASS; break;
+
+		case '\\':
+			switch (c = *p++) {
+			case EOS: goto Exit;
+			case 'a': c = '\a'; break;
+			case 'b': c = '\b'; break;
+			case 'f': c = '\f'; break;
+			case 't': c = '\t'; break;
+			case 'v': c = '\v'; break;
+			case '\\': c = '\\'; break;
+			}
+			break;
+		}
+
+		buf[i++] = (ignoreCase ? tolower(c) : c);
+	}
+
+Exit:
+	buf[i] = EOS;
+}
+
+static BOOL
+patternMatch(char* pattern, char* string)
+
+/* Return TRUE if pattern matches string. */
+{
+	register char pc, sc;
+	char* pat;
+	BOOL anchored;
+
+	if (anchored = (*pattern == ANCHOR))
+		++pattern;
+
+Top:			/* Once per char in string. */
+	pat = pattern;
+
+Again:
+	pc = *pat;
+	sc = *string;
+
+	if (sc == '\n' || sc == EOS) {
+		/* at end of line or end of text */
+		if (pc == EOS) goto Success;
+		else if (pc == ASTRSK) {
+			/* patternMatch (pat + 1,base, index, end) */
+			++pat;
+			goto Again;
+		}
+		else return (FALSE);
+	}
+	else {
+		if (pc == sc || pc == QM) {
+			/* patternMatch (pat + 1,string + 1) */
+			++pat;
+			++string;
+			goto Again;
+		}
+		else if (pc == EOS) goto Success;
+		else if (pc == ASTRSK) {
+			if (patternMatch(pat + 1, string)) goto Success;
+			else {
+				/* patternMatch (pat, string + 1) */
+				++string;
+				goto Again;
+			}
+		}
+		else if (pc == BEGCLASS) { /* char class */
+			BOOL clmatch = FALSE;
+			while (*++pat != ENDCLASS) {
+				if (!clmatch && *pat == sc) clmatch = TRUE;
+			}
+			if (clmatch) {
+				++pat;
+				++string;
+				goto Again;
+			}
+		}
+	}
+
+	if (anchored) return (FALSE);
+
+	++string;
+	goto Top;
+
+Success:
+	return (TRUE);
+}
+
+
+
