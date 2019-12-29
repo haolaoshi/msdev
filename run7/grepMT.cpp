@@ -1,7 +1,13 @@
+
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <Windows.h>
 #include <tchar.h>
 #include <stdio.h>
 #include <process.h>
+
+
+
 typedef struct {
 	int argc;
 	TCHAR targv[4][MAX_PATH];
@@ -63,8 +69,8 @@ int _tmain(int argc, LPTSTR argv[])
 void tchar2char(const TCHAR* tch, char* ch)
 {
 	int len;
-	len = WideCharToMultiByte(CP_ACP, 0, tch, -1, NULL, 0, NULL, NULL);
-	WideCharToMultiByte(CP_ACP, 0, tch, -1, ch, len, NULL, NULL);
+	len = WideCharToMultiByte(CP_ACP, 0, (LPCWCH)tch, -1, NULL, 0, NULL, NULL);
+	WideCharToMultiByte(CP_ACP, 0, (LPCWCH)tch, -1, ch, len, NULL, NULL);
 }
 /* Source code for grep follows and is omitted from text. */
 /* The form of the code is:
@@ -208,6 +214,7 @@ static void
 prepSearchString(char* p, char* buf)
 
 /* Copy prep'ed search string to buf. */
+/*The register keyword specifies that the variable is to be stored in a machine register, if possible.*/
 {
 	register int c;
 	register int i = 0;
