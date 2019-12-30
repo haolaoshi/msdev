@@ -23,5 +23,15 @@ static HANDLE* pThreadHandle;
 
 int _tmain(int argc, LPTSTR argv[])
 {
+	HANDLE hFile, mHandle;
+	LPRECORD pRecords = NULL;
+	DWORD lowRecordNum, nRecTh, numFiles, iTh;
+	LARGE_INTEGER fileSize;
+	BOOL noPrint;
+	int iFF, iNP;
+	PTHREADARG threadArg;
+	LPTSTR stirngEnd;
+	iNP = Options(argc, argv, _T("n"), &noPrint, NULL);
+	iFF = iNP + 1;
 
 }
