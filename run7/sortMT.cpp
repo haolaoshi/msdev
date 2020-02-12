@@ -33,5 +33,10 @@ int _tmain(int argc, LPTSTR argv[])
 	LPTSTR stirngEnd;
 	iNP = Options(argc, argv, _T("n"), &noPrint, NULL);
 	iFF = iNP + 1;
+	numFiles = _ttoi(argv[iNP]);
+	hFile = CreateFile(argv[iFF], GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+	SetFilePointer(hFile, 2, 0, FILE_END);
+	SetEndOfFile(hFile);
+
 
 }
