@@ -1,5 +1,5 @@
+#include<Windows.h>
 #include <stdio.h>
-#include <errno.h>
 
 #define BUF_SIZE	256
 //program 1-1
@@ -26,7 +26,7 @@ int main(int argc, char* argv[])
 		return 3;
 	}
 	while ((bytesIn = fread(rec, 1, BUF_SIZE, inFile)) > 0) {
-		bytesOut = fwrite(rec, 1, BUF_SIZE, outFile);
+		bytesOut = fwrite(rec, 1, bytesIn, outFile);
 		if (bytesOut != bytesIn) {
 			perror("Fatal write error");
 			return 4;

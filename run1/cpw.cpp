@@ -1,9 +1,16 @@
 #include <Windows.h>
+#include <tchar.h>
 #include <stdio.h>
 #define BUF_SIZE	256
 //program 1-2
 //a c++ style copy cmd
-int main(int argc, LPTSTR argv[])
+
+
+
+
+VOID ReportError(LPCTSTR userMessage, DWORD exitCode, BOOL printfErrorMessage);
+VOID ReportException(LPCTSTR userMessage, DWORD exceptionCode);
+int _tmain(int argc, LPTSTR argv[])
 {
 	HANDLE hIn, hOut;
 	DWORD nIn, nOut;
@@ -16,8 +23,10 @@ int main(int argc, LPTSTR argv[])
 	}
 
 	hIn = CreateFile(argv[1], GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (hIn = INVALID_HANDLE_VALUE) {
-		printf("Cannot open input file .Error: %x\n", GetLastError());
+	if (hIn == INVALID_HANDLE_VALUE) {
+	 
+		ReportException(_T("Cannot open input file ."), 1);
+	//	printf("Cannot open input file %s.Error: %x\n", argv[1],GetLastError());
 		return 2;
 	}
 	hOut = CreateFile(argv[2], GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
