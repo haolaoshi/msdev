@@ -2,7 +2,6 @@
 #include<windows.h>
 #include <tchar.h>
 #include<stdarg.h>
-#include "refer.h"
 #ifdef _UNICODE 
 #define _memtchr wmemchr
 #else

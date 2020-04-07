@@ -1,7 +1,6 @@
 #include <Windows.h>
 #include <stdio.h>
 #include <tchar.h>
-#include "refer.h"
 /* General-purpose function for reporting system errors.
 	Obtain the error number and turn it into the system error message.
 	Display this information and the user-specified message to the standard error device.

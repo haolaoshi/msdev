@@ -14,8 +14,8 @@ __declspec(dllexport) BOOL __cdecl PrintStrings(HANDLE hOut, ...);
 __declspec(dllexport) BOOL __cdecl PrintMsg(HANDLE hOut, LPCTSTR pMsg);
 __declspec(dllexport) BOOL __cdecl ConsolePrompt(LPCTSTR pPromptMsg, LPTSTR pResponse, DWORD maxChar, BOOL echo);
 
-//__declspec(dllexport) VOID __cdecl  GetArgs(LPCTSTR command, int* pargc, LPTSTR argstr[]);
-//__declspec(dllexport) LPTSTR __cdecl SkipArg(LPCTSTR targv);
+__declspec(dllexport) VOID __cdecl  GetArgs(LPCTSTR command, int* pargc, LPTSTR argstr[]);
+__declspec(dllexport) LPTSTR __cdecl SkipArg(LPCTSTR targv);
 #ifdef __cplusplus
 }
 #endif

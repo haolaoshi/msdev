@@ -1,6 +1,6 @@
 #include <Windows.h>
 #include <tchar.h>
-#include "refer.h"
+ 
 
 void GetArgs(LPCTSTR Command, int* pArgc, LPTSTR argstr[])
 {
