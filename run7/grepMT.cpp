@@ -7,11 +7,11 @@
 #include <process.h>
 
 
-
+//grep thread's data structure
 typedef struct {
-	int argc;
-	TCHAR targv[4][MAX_PATH];
-}GREP_THREAD_ARG;
+	int argc;//4
+	TCHAR targv[4][MAX_PATH];//8
+}GREP_THREAD_ARG;//12
 
 typedef GREP_THREAD_ARG* PGR_ARGS;
 static DWORD WINAPI ThGrep(PGR_ARGS pArgs);
@@ -27,16 +27,20 @@ int _tmain(int argc, LPTSTR argv[])
 	STARTUPINFO startup;
 	PROCESS_INFORMATION processinfo;
 	GetStartupInfo(&startup);
+
+	/*BOSS Thread : Create separate "grep" thread for each file. */
 	tHandle = (HANDLE*)malloc((argc - 2) * sizeof(HANDLE));
-	gArg = (GREP_THREAD_ARG*)malloc((argc - 2) * sizeof(GREP_THREAD_ARG));
+	gArg = (GREP_THREAD_ARG*)malloc((argc - 2) * sizeof(GREP_THREAD_ARG));//timep grepMT  1 2 3 
 	for (iThd = 0; iThd < argc - 2; iThd++) {
-		_tcscpy(gArg[iThd].targv[1], argv[1]);
-		_tcscpy(gArg[iThd].targv[2], argv[iThd + 2]);
-		GetTempFileName(_T("."), _T("Gre"), 0, gArg[iThd].targv[3]);
+		_tcscpy(gArg[iThd].targv[1], argv[1]); //Pattern 
+		_tcscpy(gArg[iThd].targv[2], argv[iThd + 2]); // 
+		GetTempFileName(_T("."), _T("Gre"), 0, gArg[iThd].targv[3]);//temp file name
 		gArg[iThd].argc = 4;
+		/*Create Work Thread to execute command line. */
 		tHandle[iThd] = (HANDLE)_beginthreadex(NULL, 0, (_beginthreadex_proc_type)ThGrep, &gArg[iThd], 0, NULL);
 
 	}
+	/*Redirect std output for file listing process . */
 	startup.dwFlags = STARTF_USESTDHANDLES;
 	startup.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 	threadCount = argc - 2;

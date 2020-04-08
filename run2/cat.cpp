@@ -7,10 +7,6 @@
 static VOID CatFile(HANDLE, HANDLE);
 VOID ReportError(LPCTSTR userMessage, DWORD exitCode, BOOL printfErrorMessage);
 DWORD Options(int argc, LPTSTR argv[], LPCTSTR OptStr, ...);
-LPSTR  a = new char[4];//字符串，每个字符1字节
-LPCSTR b = new char[10];//字符串，每个字符1字节,C表示常量
-LPTSTR c = new char[20];//通用类型
-LPCTSTR d= new char[16];//通用类型，C表示常量
 
 
 int _tmain(int argc, LPTSTR argv[])
@@ -29,7 +25,7 @@ int _tmain(int argc, LPTSTR argv[])
 
 	for (iArg = iFirstFile; iArg < argc; iArg++)
 	{
-		hInFile = CreateFile(argv[1], GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+		hInFile = CreateFile(argv[iArg], GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (hInFile == INVALID_HANDLE_VALUE) {
 			if (!dashS) ReportError(_T("Error File doesnot exist."),0,FALSE);
 

@@ -1,8 +1,10 @@
 #include <Windows.h>
+#include <tchar.h>
+
 #include <stdio.h>
 //program 1-3
 //a system function style copy cmd
-int main(int argc, LPTSTR argv[])
+int _tmain(int argc, LPTSTR argv[])
 {
 	if (argc != 3) {
 

@@ -11,7 +11,9 @@ int _tmain(int argc, LPTSTR argv[])
 
 	if (argc != 4)
 		ReportError(_T("Usage : cci shift file1 file2"), 1, FALSE);
-	if (!cci_f(argv[2], argv[3], atoi(argv[1])))
+
+ 
+	if (!cci_f(argv[2], argv[3], atoi((char*)argv[1])))
 		ReportError(_T("Encryption Failed."), 4, TRUE);
 	return 0;
 }
@@ -24,6 +26,7 @@ BOOL cci_f(LPCTSTR fIn, LPCTSTR fOut, DWORD shif)
 	DWORD nIn, nOut, iCopy;
 	CHAR aBuffer[BUF_SIZE], ccBuffer[BUF_SIZE];
 	BOOL writeOK = TRUE;
+	_tprintf(_T("shif = %d \n"), shif);
 
 	hIn = CreateFile(fIn, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hIn == INVALID_HANDLE_VALUE) return FALSE;

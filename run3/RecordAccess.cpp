@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <tchar.h>
 #include <stdio.h>
+#include <string.h>
 
 #define STRING_SIZE 256
 
@@ -34,7 +35,11 @@ int _tmain(int argc, char* argv[])
 
 	openOption = ((argc > 2 && atoi(argv[2]) <= 0) || argc <= 2) ? OPEN_EXISTING : CREATE_ALWAYS;
 
-	hFile = CreateFile(argv[1], GENERIC_READ | GENERIC_WRITE, 0, NULL, openOption, FILE_FLAG_RANDOM_ACCESS, NULL);
+
+	  
+	_tprintf(_T("File name %s \n"), (LPCTSTR)argv[1]);
+
+	hFile = CreateFile((LPCTSTR)argv[1], GENERIC_READ | GENERIC_WRITE, 0, NULL, openOption, FILE_FLAG_RANDOM_ACCESS, NULL);
 	if (argc >= 3 && atoi(argv[2]) > 0) {
 		header.numberRecords = atoi(argv[2]);
 		WriteFile(hFile, &header, sizeof(header), &nxfer, &ovzero);
@@ -51,7 +56,7 @@ int _tmain(int argc, char* argv[])
 		_tscanf(_T("%c%u%c"), &command, &recno, &extra);
 		if (command == 'q') break;
 		if (recno >= header.numberRecords) {
-			_tprintf(_T("Record number is too large"));
+			_tprintf(_T("Record number is too large ( %d  -- %d )"), recno , header.numberRecords);
 			continue;
 		}
 		curPtr.QuadPart = (LONGLONG)recno * sizeof(RECORD) + sizeof(HEADER);
@@ -89,7 +94,9 @@ int _tmain(int argc, char* argv[])
 			}
 			record.recordUpdateTime = currentTime;
 			record.referenceCount++;
-			strncpy_s(record.dataString, astr, STRING_SIZE - 1);
+		//	errno_t strncpy_s(char* restrict dest, rsize_t destsz,const char* restrict src, rsize_t count);
+
+			strncpy_s((char* )record.dataString,  STRING_SIZE - 1,(char* )astr, STRING_SIZE - 1);
 			recordChange = TRUE;
 		}
 		else {
