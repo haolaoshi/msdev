@@ -1,7 +1,7 @@
 #include <Windows.h>
 #include <tchar.h>
 #include <stdio.h>
-
+ LPTSTR  SkipArg(LPCTSTR targv);
 int _tmain(int argc,LPTSTR argv[])
 {
 	STARTUPINFO startup;
@@ -16,12 +16,14 @@ int _tmain(int argc,LPTSTR argv[])
 	SYSTEMTIME eltiSys,ketiSys,ustiSys,startSys;
 	LPTSTR targv = SkipArg(GetCommandLine());
 	HANDLE hProc;
-	HANDLE hProc;
 	GetStartupInfo(&startup);
 	GetSystemTime(&startSys);
 
 	CreateProcess(NULL,targv,NULL,NULL,TRUE,NORMAL_PRIORITY_CLASS,NULL,NULL,&startup,&procInfo);
 	hProc = procInfo.hProcess;
+	if (hProc == NULL) {
+		_tprintf(_T("invalid process name.\n"));
+	}
 	WaitForSingleObject(hProc,INFINITE);
 	GetProcessTimes(hProc,&createTime.ft,&exitTime.ft,&kernelTime,&userTime);
 	elapsedTime.li = exitTime.li - createTime.li;
