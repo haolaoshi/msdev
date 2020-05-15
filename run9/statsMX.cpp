@@ -23,7 +23,7 @@
 #define DELAY_COUNT		20
 #define CACHE_LINE_SIZE	64
 
-DWORD WINAPI Worker(void*);
+unsigned __stdcall Worker(void*);
 
 __declspec(align(CACHE_LINE_SIZE))
 typedef struct _THARG {
@@ -32,6 +32,18 @@ typedef struct _THARG {
 	unsigned int tasksToComplete;
 	unsigned int tasksComplete;
 } THARG;
+
+unsigned Counter;
+unsigned __stdcall SecondThreadFunc(void* pArguments)
+{
+	printf("In second thread...\n");
+
+	while (Counter < 1000000)
+		Counter++;
+
+	_endthreadex(0);
+	return 0;
+}
 
 int _tmain(DWORD argc, LPTSTR argv[])
 {
@@ -53,7 +65,8 @@ int _tmain(DWORD argc, LPTSTR argv[])
 		pThreadArg->tasksToComplete = tasksPerThread;
 		pThreadArg->tasksComplete = 0;
 		pThreadArg->hMutex = hMutex;
-		hWorkers[iThread] = (HANDLE)_beginthreadex(NULL, 0, (_beginthreadex_proc_type)Worker, pThreadArg, 0, NULL);
+		hWorkers[iThread] = (HANDLE)_beginthreadex(NULL, 0, &Worker, pThreadArg, 0, NULL);
+		//hThread = (HANDLE)_beginthreadex(NULL, 0, &SecondThreadFunc, NULL, 0, &threadID);
 
 	}
 
@@ -78,7 +91,7 @@ int _tmain(DWORD argc, LPTSTR argv[])
 	return 0;
 }
 
-DWORD WINAPI Worker(void* arg)
+unsigned __stdcall Worker(void* arg)
 {
 	THARG* threadArgs;
 	int iThread;
