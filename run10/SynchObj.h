@@ -1,5 +1,8 @@
 #include <Windows.h>
-
+#include <tchar.h>
+/**
+** 10-1 Threshold Barrier Definitions
+**/
 typedef struct THRESHOLD_BARRIER_TAG {
 	HANDLE bGuarg;
 	HANDLE bEvent;
@@ -15,7 +18,7 @@ DWORD CloseThresholdBarrier(THB_OBJECT);
 #define SYNCH_OBJ_CREATE_FAILURE	2
 #define SYNCH_OBJ_BUSY 3
 
-
+/* 10-3 Queue Definitions */
 typedef struct QUEUE_OBJECT_TAG {
 	HANDLE qGuard;
 	HANDLE qNe;

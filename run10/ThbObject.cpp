@@ -1,5 +1,10 @@
 #include "SynchObj.h"
 
+/*
+   10-2 implementing the Threshold Barrier 
+*/
+
+
 DWORD CreateThresholdBarrier(THB_OBJECT* pThb, DWORD bValue)
 {
 	THB_OBJECT objThb;

@@ -1,5 +1,6 @@
 #include "SynchObj.h"
 
+/*  10-4 The Queue Management Functions */
 DWORD QueueGet(QUEUE_OBJECT* q, PVOID msg, DWORD mSize, DWORD maxWait)
 {
 	DWORD TotalWaitTime = 0;
@@ -50,7 +51,7 @@ DWORD QueuePut(QUEUE_OBJECT* q, PVOID msg, DWORD mSize, DWORD maxWait)
 
 DWORD QueueInitialize(QUEUE_OBJECT* q, DWORD mSize, DWORD nMsgs)
 {
-	if ((q->msgArray = calloc(nMsgs, mSize)) == NULL)  return 1;
+	if ((q->msgArray = (char*)calloc(nMsgs, mSize)) == NULL)  return 1;
 	q->qFirst = q->qLast = 0;
 	q->qSize = nMsgs;
 	q->qGuard = CreateMutex(NULL, FALSE, NULL);
