@@ -133,5 +133,91 @@ int main(int argc, LPCTSTR argv)
 
 static DWORD WINAPI AcceptThread(PVOID pArg)
 {
+	LONG addrlen;
+	SERVER_ARG* pThArg = (SERVER_ARG*)pArg;
+	addrlen = sizeof(connectsAddr);
+	pThArg->sock = accept(SrvSock, (struct sockaddr*)&connectsAddr, &addrlen);
 
+	EnterCriticalSection(&(pThArg->threadCs));
+	__try {
+		pThArg->hSvrThread = (HANDLE)_beginthreadex(NULL, 0, Server, pThArg, 0, NULL);
+		pThArg->thState = SERVER_THREAD_RUNNING;
+	}
+	__finally {
+		LeaveCriticalSection(&(pThArg->threadCs));
+	}
+	return 0;
+}
+
+BOOL WINAPI Handler(DWORD CtrlEvent)
+{
+	_tprintf(_T("in console control handler\n"));
+	InterlockedIncrement(&shutFlag);
+	return TRUE;
+}
+
+static DWORD WINAPI Server(PVOID pArg)
+{
+	BOOL done = FALSE;
+	STARTUPINFO startInfoCh;
+	SECURITY_ATTRIBUTES tempSSA = { 0 };
+	PROCESS_INFORMATION procInfo;
+	SOCKET connectSock;
+	int commandLen;
+	REQUEST request;
+	RESPONSE response;
+	char sysCommand[MAX_RQRS_LEN], tempFile[100];
+	HANDLE hTempFile;
+	FILE* fp = NULL;
+	int(__cdecl * dl_addr)(char*, char*);
+	SERVER_ARG* pTharg = (SERVER_ARG*)pArg;
+	enum SERVER_THREAD_STATE threadState;
+
+	GetStartupInfo(&startInfoCh);
+	connectSock = pTharg->sock;
+
+	_stprintf(tempFile, _T("ServerTemp%d.tmp"), pTharg->number);
+	while (!done && !shutFlag) {
+
+		done = ReceiveRequestMessage(&request, connectSock);
+		request.record[sizeof(request.record) - 1] - '\0';
+		commandLen = strcspn(request.record, "\n\t");
+		memcpy(sysCommand, request.record, commandLen);
+
+		sysCommand[commandLen] = '\0';
+
+		_tprintf(_T("command received on server slot %d: %s \n"), pTharg->number, sysCommand);
+		done = done || (strcmp(request.record, "$Quid") == 0) || shutFlag;
+		if (done) continue;
+
+		hTempFile = CreateFile(tempFile, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, &tempSA, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+		dl_addr = NULL;
+		if (pTharg->hDll != NULL) {
+			char commandLine[256] = "";
+			int commandNameLength = strcspn(sysCommand, "");
+			strncpy(commandName, sysCommand, min(commandNameLength, sizeof(commandName)));
+			dl_addr = (int(*)(char*, char*)) GetProcAddress(pTharg->hDll, commandName);
+			if (dl_adr != NULL) {
+				(*dl_addr)(request.record, tempFile);
+			}
+		}
+
+		if (dl_addr == NULL) {
+			//Create a process to carry out the commandl
+			//same as in serverNP
+		}
+		/*respond a line at a time. it is convenient to use c library line-oriented routine at this point.*/
+
+	}
+
+	_tprintf(_T("shuting down server thread # %d\n"), pTharg->number);
+	closesocket(connectSock);
+	EnterCriticalSection(&(pTharg->threadCs));
+	__try {
+		threadState = pTharg->thState = SERVER_THREAD_STOPPED;
+	}
+	__finally {
+		LeaveCriticalSection(&(pTharg->threadCs));
+	}
+	return threadState;
 }
