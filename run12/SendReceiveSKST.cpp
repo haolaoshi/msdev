@@ -17,6 +17,10 @@ static char staticBuf[MAX_RQRS_LEN];
 static LONG32 staticBufLen;
 
 static volatile long nPa = 0, nPd = 0, nTa = 0, nTd = 0;
+int a;
+INT b;
+void c;
+VOID d;
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
