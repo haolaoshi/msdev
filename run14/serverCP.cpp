@@ -124,13 +124,53 @@ static DWORD WINAPI Server(SERVER_THREAD_ARG pTharg)
 
 static DWORD WINAPI ComputeThread(PVOID pArg)
 {
+	PROCESS_INFORMATION procInfo;
+	STARTUPINFO startInfo;
+	CP_KEY *pKey = (CP_KEY*)pArg;
+	SECURITY_ATTRIBUTES tempSA = {sizeof(SECURITY_ATTRIBUTES),NULL,TRUE};
+	GetStartupInfo(&startInfo);
+	pKey->hTempFile = CreateFile(pKey->tmpFileName,GENERIC_READ	|GENERIC_WRITE,FILE_SHARE_READ|FILE_SHARE_WRITE,
+		&tempSA,CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,NULL);
+	if(pKey->hTempFile != INVALID_HANDLE_VALUE){
+
+	}
 	return 0;
 }
+
+typedef struct {
+
+}MS_MESSAGE;
 
 static DWORD WINAPI ServerBroadcast(LPLONG pNull)
 {
 
+	MS_MESSAGE MsNotify;
+	DWORD nXfer,iNp;
+	HANDLE hMsFile;
+	/*open the mailslot for the MS "client" writer */
+	while(!shutDown){
+		/*wait for another client to open a mailslot*/
+		Sleep(CS_TIMEOUT);
+		hMsFile = CreateFile(MS_CLIENTNAME,GENERIC_WRITE|GENERIC_READ,FILE_SHARE_READ|FILE_SHARE_WRITE,
+			NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
+		if(hMsFile == INVALID_HANDLE_VALUE) continue;
+		/*send out the msg to the mailslot*/
+		MsNotify.msStatus = 0;
+		MsNotify.msUtilization = 0;
+		_tcscpy(MsNotify.msName,SERVER_PIPE);
+		if(!WriteFile(hMsFile,&MsNotify,MSM_SIZE,&nXfer,NULL)) 
+			ReportError(_T("Server ms Writer error."),13,TRUE);
+			CloseHandle(hMsFile);
+		}
+		_tprintf(_T("cancel all outstanding I/O operation .\n"));
+		for(iNp = 0 ; iNp < MAX_CLIENTS_CP;iNp++){
+			CancelIoEx(Key[iNp].hNp,NULL);
+		}
+		_tprintf(_T("Shutting down monitor threawd.\n"));
+		_endthreadex(0);
 
+
+ 
 	return 0;
 }
 
